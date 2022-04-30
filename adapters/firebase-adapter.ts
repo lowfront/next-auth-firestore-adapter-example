@@ -201,7 +201,7 @@ export default function FirebaesAdapter(
       if (!verificationTokenRef) return null;
       const verificationToken = verificationTokenRef.data();
       await deleteDoc(findVerificationTokenDoc(verificationTokenRef.id));
-      return verificationToken as VerificationToken;
+      return from(verificationToken) as VerificationToken;
     },
   }
 }
