@@ -14,9 +14,9 @@ export type FirebaseAdapterProps = {
 
 export const getFirebaseAuth = (function () {
   let inited = false;
-  let result: Promise<any>;
+  let result: Promise<any> = Promise.resolve();
   return async function getFirebaseAuth({email, password}: {email?: string; password?: string} = {}) {
-    if (!email || !password) return Promise.resolve();
+    if (!email || !password) return result;
     if (inited) return result;
     inited = true;
     const auth = getAuth();
@@ -38,7 +38,7 @@ export default function FirebaesAdapter(
   const accountCollectionRef = collection(db, adapterCollectionName, 'store', 'account');
   const sessionCollectionRef = collection(db, adapterCollectionName, 'store', 'session');
   const verificationTokenCollectionRef = collection(db, adapterCollectionName, 'store', 'verificationToken');
-  
+
   const findUserDoc = (...keys: string[]) => doc(db, adapterCollectionName, 'store', 'user', ...keys);
   const findAccountDoc = (...keys: string[]) => doc(db, adapterCollectionName, 'store', 'account', ...keys);
   const findSessionDoc = (...keys: string[]) => doc(db, adapterCollectionName, 'store', 'session', ...keys);
