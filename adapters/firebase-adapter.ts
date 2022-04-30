@@ -1,5 +1,5 @@
-import { addDoc, collection, deleteDoc, doc, DocumentData, DocumentReference, Firestore, getDoc, getDocs, limit, query, setDoc, where } from "firebase/firestore";
-import { Adapter, AdapterSession, AdapterUser } from "next-auth/adapters";
+import { addDoc, collection, deleteDoc, doc, Firestore, getDoc, limit, query, setDoc, where } from "firebase/firestore";
+import { Adapter, AdapterSession, AdapterUser, VerificationToken } from "next-auth/adapters";
 import { findOne, from } from "./utils";
 import { Account } from "next-auth";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
@@ -12,7 +12,7 @@ export type FirebaseAdapterProps = {
   }
 }
 
-const getFirebaseAuth = (function () {
+export const getFirebaseAuth = (function () {
   let inited = false;
   let result: Promise<any>;
   return async function getFirebaseAuth({email, password}: {email?: string; password?: string} = {}) {
@@ -37,10 +37,12 @@ export default function FirebaesAdapter(
   const userCollectionRef = collection(db, adapterCollectionName, 'store', 'user');
   const accountCollectionRef = collection(db, adapterCollectionName, 'store', 'account');
   const sessionCollectionRef = collection(db, adapterCollectionName, 'store', 'session');
-
+  const verificationTokenCollectionRef = collection(db, adapterCollectionName, 'store', 'verificationToken');
+  
   const findUserDoc = (...keys: string[]) => doc(db, adapterCollectionName, 'store', 'user', ...keys);
   const findAccountDoc = (...keys: string[]) => doc(db, adapterCollectionName, 'store', 'account', ...keys);
   const findSessionDoc = (...keys: string[]) => doc(db, adapterCollectionName, 'store', 'session', ...keys);
+  const findVerificationTokenDoc = (...keys: string[]) => doc(db, adapterCollectionName, 'store', 'verificationToken', ...keys);
 
   return {
     async createUser(data) {
@@ -185,11 +187,21 @@ export default function FirebaesAdapter(
       if (!sessionRef) return;
       await deleteDoc(findSessionDoc(sessionRef.id));
     },
-    // async createVerificationToken(data) {
-
-    // },
-    // async useVerificationToken(identifier_token) {
-
-    // },
+    async createVerificationToken(data) { // need test
+      const verificationTokenRef = await addDoc(verificationTokenCollectionRef, data);
+      const verificationToken = {
+        id: verificationTokenRef.id,
+        ...data,
+      };
+      return verificationToken;
+    },
+    async useVerificationToken({ identifier, token }) { // need test
+      const q = query(verificationTokenCollectionRef, where('identifier', '==', identifier), where('token', '==', token), limit(1));
+      const verificationTokenRef = await findOne(q);
+      if (!verificationTokenRef) return null;
+      const verificationToken = verificationTokenRef.data();
+      await deleteDoc(findVerificationTokenDoc(verificationTokenRef.id));
+      return verificationToken as VerificationToken;
+    },
   }
 }

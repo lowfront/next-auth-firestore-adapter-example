@@ -1,6 +1,6 @@
 {
-  "name": "220430-next-auth-firebase-adapter-suggestion",
-  "version": "0.1.0",
+  "name": "220430-next-auth-firebase-adapter-example",
+  "version": "0.1.1",
   "private": true,
   "scripts": {
     "dev": "next dev",

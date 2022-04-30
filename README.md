@@ -1,4 +1,4 @@
-# Firebase adepter auth process suggestion in Next Auth
+# Firebase adepter auth process example in Next Auth
 Example of a firebase adapter that works with firebase authentication. A firebase is a database that has rules functionality for use by both servers and clients. If use firebase on a client, if rule is not set, all data accessible to the client is accessible to anyone who can read the code. When storing user, account, and session data in the next-adapter in the firebase, if rule is not set, all data will be public. So if you're using firebase, for security, you have to create a limited rule for the data stored in next-auth, create a firebase user with access to that data, sign in firebase, and then read and write the data. This repository is an example and a suggestion. I was made a firestore target because I would use firestore, but could use it as a firebase in the same way.
 
 1. Go to [firebase console](https://console.firebase.google.com/project) and select your project. 
