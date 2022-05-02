@@ -176,8 +176,11 @@ export default function FirebaesAdapter(
     },
     async updateSession(data) {
       await getFirebaseAuth(options.auth);
-      const { id, ...sessionData } = data;
-      await setDoc(findSessionDoc(id as string), sessionData);
+      const { sessionToken, ...sessionData } = data;
+      const q = query(sessionCollectionRef, where('sessionToken', '==', sessionToken), limit(1));
+      const sessionRef = await findOne(q);
+      if (!sessionRef) return;
+      await setDoc(findSessionDoc(sessionRef.id), sessionData);
       return data as AdapterSession;
     },
     async deleteSession(sessionToken) {
