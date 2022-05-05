@@ -1,7 +1,7 @@
 import { getAuth } from "firebase-admin/auth";
 import admin, { ServiceAccount } from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
-import serviceAccount from '../firebase.serviceAccountKey.json';
+import serviceAccount from 'firebase.serviceAccountKey.json';
 import { NextApiRequest, NextApiResponse } from "next";
 import { Session } from "next-auth";
 import { getSession } from "next-auth/react";
