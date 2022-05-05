@@ -1,7 +1,6 @@
 import { getAuth } from "firebase-admin/auth";
 import admin, { ServiceAccount } from 'firebase-admin';
 import { getFirestore } from 'firebase-admin/firestore';
-import serviceAccount from 'firebase.serviceAccountKey.json';
 import { NextApiRequest, NextApiResponse } from "next";
 import { Session } from "next-auth";
 import { getSession } from "next-auth/react";
@@ -9,7 +8,18 @@ import { getSession } from "next-auth/react";
 // https://github.com/vercel/next.js/issues/1999#issuecomment-302244429
 if (!admin.apps.length) {
   admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount as ServiceAccount)
+    credential: admin.credential.cert({
+      type: process.env.FIREBASE_ADMIN_CONFIG_type,
+      project_id: process.env.FIREBASE_ADMIN_CONFIG_project_id,
+      private_key_id: process.env.FIREBASE_ADMIN_CONFIG_private_key_id,
+      private_key: process.env.FIREBASE_ADMIN_CONFIG_private_key,
+      client_email: process.env.FIREBASE_ADMIN_CONFIG_client_email,
+      client_id: process.env.FIREBASE_ADMIN_CONFIG_client_id,
+      auth_uri: process.env.FIREBASE_ADMIN_CONFIG_auth_uri,
+      token_uri: process.env.FIREBASE_ADMIN_CONFIG_token_uri,
+      auth_provider_x509_cert_url: process.env.FIREBASE_ADMIN_CONFIG_auth_provider_x509_cert_url,
+      client_x509_cert_url: process.env.FIREBASE_ADMIN_CONFIG_client_x509_cert_url,
+    } as ServiceAccount)
   });
 }
 
