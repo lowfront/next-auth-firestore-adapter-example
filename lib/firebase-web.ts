@@ -37,14 +37,18 @@ export async function findMany(q: Query<DocumentData>): Promise<QueryDocumentSna
   return result;
 }
 
+export function validCustomToken(id: string) {
+  const docRef = doc(db, 'store', id);
+  return getDoc(docRef);
+}
 
 export async function getUserDoc(id: string, ...paths: string[]) {
   let failCount = 3;
   while (failCount--) {
     try {
-      const docRef = await doc(db, 'store', id, ...paths);
+      await validCustomToken(id);
+      const docRef = doc(db, 'store', id, ...paths);
       return docRef;
-      break;
     } catch (err: any) {
       console.error(err);
       const token = await ky.get('/api/auth/token').text();
@@ -56,9 +60,9 @@ export async function getUserCollection(id: string, ...paths: string[]) {
   let failCount = 3;
   while (failCount--) {
     try {
-      const collectionRef = await collection(db, 'store', id, ...paths);
+      await validCustomToken(id);
+      const collectionRef = collection(db, 'store', id, ...paths);
       return collectionRef;
-      break;
     } catch (err: any) {
       console.error(err);
       const token = await ky.get('/api/auth/token').text();
