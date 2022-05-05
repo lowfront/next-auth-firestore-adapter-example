@@ -1,7 +1,7 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithCustomToken } from "firebase/auth";
-// import { getAnalytics } from "firebase/analytics";
+import { getAnalytics } from "firebase/analytics";
 import { getFirestore, doc, getDoc, collection, Query, DocumentData, QueryDocumentSnapshot, getDocs } from "firebase/firestore";
 import ky from "ky";
 
@@ -23,7 +23,10 @@ const firebaseConfig = {
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth();
-// export const analytics = getAnalytics(app);
+export const analytics = (() => {
+  if (typeof window !== 'undefined') return getAnalytics(app); // https://stackoverflow.com/a/69457158/16962686
+  return null;
+})();
 export const db = getFirestore(app);
 
 export async function findOne(q: Query<DocumentData>): Promise<QueryDocumentSnapshot<DocumentData>|null> {
