@@ -1,9 +1,8 @@
-import { addDoc, deleteDoc, DocumentData, DocumentSnapshot, getDoc, onSnapshot, query, setDoc, updateDoc, where } from 'firebase/firestore'
-import { auth, findMany, getUserCollection, getUserDoc } from 'lib/firebase-web';
-import { getAuth } from 'firebase/auth';
+import { addDoc, deleteDoc, getDoc, onSnapshot, query, updateDoc, where } from 'firebase/firestore'
+import { findMany, getUserCollection, getUserDoc } from 'lib/firebase-web';
 import type { GetServerSideProps, NextPage } from 'next'
 import { Session } from 'next-auth'
-import { getSession, signIn, signOut, useSession } from 'next-auth/react'
+import { getSession, signIn, signOut } from 'next-auth/react'
 import { KeyboardEvent, SyntheticEvent, useEffect, useState } from 'react'
 import Footer from 'components/Footer';
 import { Todo } from 'lib/types';
