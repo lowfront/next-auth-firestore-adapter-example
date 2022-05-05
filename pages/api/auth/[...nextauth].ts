@@ -1,7 +1,7 @@
-import NextAuth from "next-auth"
+import NextAuth, { Session } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
 import FirebaesAdapter from "../../../adapters/firebase-adapter"
-import { db } from "../../../controllers/firebase-db"
+import { db } from "../../../controllers/firebase-server"
 
 export default NextAuth({
   providers: [
@@ -10,10 +10,11 @@ export default NextAuth({
       clientSecret: process.env.GOOGLE_SECRET,
     }),
   ],
-  adapter: FirebaesAdapter(db, {
-    auth: {
-      email: process.env.FIREBASE_ADMIN_EMAIL as string,
-      password: process.env.FIREBASE_ADMIN_PASSWORD as string,
-    },
-  }),
+  adapter: FirebaesAdapter(db),
+  callbacks: {
+    session: async ({ session, user }) => {
+       session.id = user.id;
+       return session as Session;
+    }
+  },
 })

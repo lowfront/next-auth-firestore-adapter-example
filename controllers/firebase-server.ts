@@ -1,0 +1,76 @@
+import { getAuth } from "firebase-admin/auth";
+import admin, { ServiceAccount } from 'firebase-admin';
+import { getFirestore } from 'firebase-admin/firestore';
+import serviceAccount from '../firebase.serviceAccountKey.json';
+import { NextApiRequest, NextApiResponse } from "next";
+import { Session } from "next-auth";
+import { getSession } from "next-auth/react";
+
+// https://github.com/vercel/next.js/issues/1999#issuecomment-302244429
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount as ServiceAccount)
+  });
+}
+
+export const app = admin.apps[0];
+
+export const auth = getAuth();
+
+export const db = getFirestore();
+
+
+export type CustomToken = {
+  token: string;
+  expires: string; // date
+};
+
+export async function getToken(email: string) {
+  const tokenDocRef = db.collection('tokens').doc(email);
+  const tokenDoc = await tokenDocRef.get();
+  if (!tokenDoc.exists) return;
+  const { token, expires } = tokenDoc.data() as CustomToken;
+  if (Date.now() > new Date(expires).getTime()) return;
+  return token;
+}
+
+export async function updateToken(email: string, token: string) {
+  const tokenDocRef = db.collection('tokens').doc(email);
+
+  await tokenDocRef.set({
+    token,
+    expires: Date.now() + 60 * 60 * 1000,
+  });
+
+  return token;
+}
+
+export function createFirebaseCustomTokenHandler({
+  method = 'GET',
+  additionalClaims,
+}: {
+  method?: string;
+  additionalClaims?: (session: Session) => any;
+}) {
+
+  return async function handler(req: NextApiRequest, res: NextApiResponse) {
+    if (req.method !== method) return res.status(403).json(false);
+    const session = await getSession({ req }) as Session;
+    if (!session) return res.status(403).json(false);
+
+    const { user } = session as unknown as {
+      user: NonNullable<Session['user']>;
+    };
+    const email = user.email as string
+    let token = await getToken(email);
+    if (token) return res.json(token);
+  
+    token = await admin
+      .auth()
+      .createCustomToken(email, additionalClaims?.(session));
+    
+    await updateToken(email, token);
+  
+    return res.json(token);
+  };
+}

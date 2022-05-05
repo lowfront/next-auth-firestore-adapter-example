@@ -1,28 +1,11 @@
-import { addDoc, collection, deleteDoc, doc, Firestore, getDoc, limit, query, setDoc, where } from "firebase/firestore";
+import { Firestore } from "firebase-admin/firestore";
 import { Adapter, AdapterSession, AdapterUser, VerificationToken } from "next-auth/adapters";
 import { findOne, from } from "./utils";
 import { Account } from "next-auth";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
 export type FirebaseAdapterProps = {
   adapterCollectionName?: string;
-  auth?: {
-    email: string;
-    password: string;
-  }
 }
-
-export const getFirebaseAuth = (function () {
-  let inited = false;
-  let result: Promise<any> = Promise.resolve();
-  return async function getFirebaseAuth({email, password}: {email?: string; password?: string} = {}) {
-    if (!email || !password) return result;
-    if (inited) return result;
-    inited = true;
-    const auth = getAuth();
-    return result = signInWithEmailAndPassword(auth, email, password);
-  }
-})();
 
 export default function FirebaesAdapter(
   db: Firestore,
@@ -30,30 +13,26 @@ export default function FirebaesAdapter(
 ): Adapter {  
   const adapterCollectionName = options.adapterCollectionName ?? '_next_auth_firestore_adapter_';
 
-  if (options.auth) {
-    getFirebaseAuth(options.auth);
-  }
-
-  const userCollectionRef = collection(db, adapterCollectionName, 'store', 'user');
-  const accountCollectionRef = collection(db, adapterCollectionName, 'store', 'account');
-  const sessionCollectionRef = collection(db, adapterCollectionName, 'store', 'session');
-  const verificationTokenCollectionRef = collection(db, adapterCollectionName, 'store', 'verificationToken');
-
-  const findUserDoc = (...keys: string[]) => doc(db, adapterCollectionName, 'store', 'user', ...keys);
-  const findAccountDoc = (...keys: string[]) => doc(db, adapterCollectionName, 'store', 'account', ...keys);
-  const findSessionDoc = (...keys: string[]) => doc(db, adapterCollectionName, 'store', 'session', ...keys);
-  const findVerificationTokenDoc = (...keys: string[]) => doc(db, adapterCollectionName, 'store', 'verificationToken', ...keys);
+  const userCollectionRef = db.collection(adapterCollectionName).doc('store').collection('user');
+  const accountCollectionRef = db.collection(adapterCollectionName).doc('store').collection('account');
+  const sessionCollectionRef = db.collection(adapterCollectionName).doc('store').collection('session');
+  const verificationTokenCollectionRef = db.collection(adapterCollectionName).doc('store').collection('verificationToken');
+  
+  const findUserDoc = (key: string) => userCollectionRef.doc(key);
+  const findAccountDoc = (key: string) => accountCollectionRef.doc(key);
+  const findSessionDoc = (key: string) => sessionCollectionRef.doc(key);
+  const findVerificationTokenDoc = (key: string) => verificationTokenCollectionRef.doc(key);
 
   return {
     async createUser(data) {
-      await getFirebaseAuth(options.auth);
       const userData = {
         name: data.name ?? null,
         email: data.email ?? null,
         image: data.image ?? null,
         emailVerified: data.emailVerified ?? null,
       };
-      const userRef = await addDoc(userCollectionRef, userData);
+      
+      const userRef = await userCollectionRef.add(userData);
       const user = {
         id: userRef.id,
         ...userData,
@@ -61,16 +40,14 @@ export default function FirebaesAdapter(
       return user;
     },
     async getUser(id) {
-      await getFirebaseAuth(options.auth);
-      const userSnap = await getDoc(findUserDoc(id));
-      if (!userSnap.exists()) return null;
+      const userSnap = await findUserDoc(id).get();
+      if (!userSnap.exists) return null;
       
       const user = userSnap.data() as AdapterUser;
       return user;
     },
-    async getUserByEmail(email) {
-      await getFirebaseAuth(options.auth);
-      const q = query(userCollectionRef, where('email', '==', email), limit(1));
+    async getUserByEmail(email) {      
+      const q = userCollectionRef.where('email', '==', email).limit(1);
       const userRef = await findOne(q);
 
       if (!userRef) return null;
@@ -81,17 +58,16 @@ export default function FirebaesAdapter(
       return user;
     },
     async getUserByAccount({provider, providerAccountId}) {
-      await getFirebaseAuth(options.auth);
-      const q = query(accountCollectionRef, where('provider', '==', provider), where('providerAccountId', '==', providerAccountId), limit(1));
+      const q = accountCollectionRef.where('provider', '==', provider).where('providerAccountId', '==', providerAccountId).limit(1);
       const accountRef = await findOne(q);
       if (!accountRef) return null;
       const account = {
         id: accountRef.id,
         ...accountRef.data(),
       } as unknown as Account;
-
-      const userRef = await getDoc(findUserDoc(account.userId as string));
-      if (!userRef) return null
+      
+      const userRef = await findUserDoc(account.userId as string).get();
+      if (!userRef.exists) return null
       const userData = userRef.data();
 
       const user = {
@@ -101,25 +77,20 @@ export default function FirebaesAdapter(
       return user;
     },
     async updateUser(data) {
-      await getFirebaseAuth(options.auth);
       const { id, ...userData } = data;
-      await setDoc(findUserDoc(id as string), userData);
-
+      findUserDoc(id as string).set(userData);
       const user = data as AdapterUser;
       return user;
     },
     async deleteUser(id) {
-      await getFirebaseAuth(options.auth);
-      const q = query(userCollectionRef, where('id', '==', id), limit(1));
+      const q = userCollectionRef.where('id', '==', id).limit(1);
       const userRef = await findOne(q);
       if (!userRef) return;
-      await deleteDoc(findUserDoc(userRef.id));
+      await findUserDoc(userRef.id).delete();
     },
     async linkAccount(data) {
-      await getFirebaseAuth(options.auth);
       const accountData = data;
-
-      const accountRef = await addDoc(accountCollectionRef, accountData);
+      const accountRef = await accountCollectionRef.add(accountData);
 
       const account = {
         id: accountRef.id,
@@ -129,21 +100,18 @@ export default function FirebaesAdapter(
       return account;
     },
     async unlinkAccount({ provider, providerAccountId }) {
-      await getFirebaseAuth(options.auth);
-      const q = query(accountCollectionRef, where('provider', '==', provider), where('providerAccountId', '==', providerAccountId), limit(1));
+      const q = accountCollectionRef.where('provider', '==', provider).where('providerAccountId', '==', providerAccountId).limit(1);
       const accountRef = await findOne(q);
       if (!accountRef) return;
-      await deleteDoc(findAccountDoc(accountRef.id));
+      await findAccountDoc(accountRef.id).delete()
     },
     async getSessionAndUser(sessionToken) {
-      await getFirebaseAuth(options.auth);
-      let q;
-      q = query(sessionCollectionRef, where('sessionToken', '==', sessionToken), limit(1));
+      const q =sessionCollectionRef.where('sessionToken', '==', sessionToken).limit(1);
       const sessionRef = await findOne(q);
       if (!sessionRef) return null;
       const sessionData: Partial<AdapterSession> = sessionRef.data();
-      const userRef = await getDoc(findUserDoc(sessionData.userId as string));
-      if (!userRef) return null
+      const userRef = await findUserDoc(sessionData.userId as string).get();
+      if (!userRef.exists) return null
       const userData = userRef.data();
       
       const user = {
@@ -161,13 +129,12 @@ export default function FirebaesAdapter(
       }
     },
     async createSession(data) {
-      await getFirebaseAuth(options.auth);
       const sessionData = {
         sessionToken: data.sessionToken ?? null,
         userId: data.userId ?? null,
         expires: data.expires ?? null,
       };
-      const sessionRef = await addDoc(sessionCollectionRef, sessionData);
+      const sessionRef = await sessionCollectionRef.add(sessionData);
       const session = {
         id: sessionRef.id,
         ...sessionData,
@@ -175,23 +142,21 @@ export default function FirebaesAdapter(
       return session;
     },
     async updateSession(data) {
-      await getFirebaseAuth(options.auth);
       const { sessionToken, ...sessionData } = data;
-      const q = query(sessionCollectionRef, where('sessionToken', '==', sessionToken), limit(1));
+      const q = sessionCollectionRef.where('sessionToken', '==', sessionToken).limit(1);
       const sessionRef = await findOne(q);
       if (!sessionRef) return;
-      await setDoc(findSessionDoc(sessionRef.id), sessionData);
+      await findSessionDoc(sessionRef.id).set(sessionData);
       return data as AdapterSession;
     },
     async deleteSession(sessionToken) {
-      await getFirebaseAuth(options.auth);
-      const q = query(sessionCollectionRef, where('sessionToken', '==', sessionToken), limit(1));
+      const q = sessionCollectionRef.where('sessionToken', '==', sessionToken).limit(1);
       const sessionRef = await findOne(q);
       if (!sessionRef) return;
-      await deleteDoc(findSessionDoc(sessionRef.id));
+      await findSessionDoc(sessionRef.id).delete();
     },
     async createVerificationToken(data) { // need test
-      const verificationTokenRef = await addDoc(verificationTokenCollectionRef, data);
+      const verificationTokenRef = await verificationTokenCollectionRef.add(data);
       const verificationToken = {
         id: verificationTokenRef.id,
         ...data,
@@ -199,11 +164,11 @@ export default function FirebaesAdapter(
       return verificationToken;
     },
     async useVerificationToken({ identifier, token }) { // need test
-      const q = query(verificationTokenCollectionRef, where('identifier', '==', identifier), where('token', '==', token), limit(1));
+      const q = verificationTokenCollectionRef.where('identifier', '==', identifier).where('token', '==', token).limit(1);
       const verificationTokenRef = await findOne(q);
       if (!verificationTokenRef) return null;
       const verificationToken = verificationTokenRef.data();
-      await deleteDoc(findVerificationTokenDoc(verificationTokenRef.id));
+      await findVerificationTokenDoc(verificationTokenRef.id).delete();
       return from(verificationToken) as VerificationToken;
     },
   }
