@@ -1,7 +1,7 @@
 import NextAuth, { Session } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
-import FirebaesAdapter from "../../../adapters/firebase-adapter"
-import { db } from "../../../controllers/firebase-server"
+import FirebaesAdapter from "adapters/firebase-adapter"
+import { db } from "lib/firebase-server"
 
 export default NextAuth({
   providers: [
