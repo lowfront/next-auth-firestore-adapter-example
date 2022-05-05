@@ -118,6 +118,11 @@ const Home: NextPage<{data: Session & {id: string}}> = ({data: session}) => {
     if (docRef) await deleteDoc(docRef);
   }
 
+  async function clearCompletedTodo() {
+    const tasks = todoEntrys.filter(([id, { checked }]) => checked).map(([id]) => removeTodo(id));
+    await Promise.all(tasks);
+  }
+
   return (
     <>
       {!session ?
@@ -187,7 +192,7 @@ const Home: NextPage<{data: Session & {id: string}}> = ({data: session}) => {
                 <Link href="/completed"><a className={filter === 'completed' ? "selected" : ''}>Completed</a></Link>
               </li>
             </ul>
-            <button className="clear-completed">Clear completed</button>
+            <button className="clear-completed" onClick={clearCompletedTodo}>Clear completed</button>
           </footer> : null}
         </>}
       </section>
