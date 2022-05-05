@@ -16,8 +16,6 @@ const Home: NextPage<{data: Session & {id: string}}> = ({data: session}) => {
   const [todoEntrys, setTodoEntrys] = useState<[string, Todo][]>([]);
   const [editingTodoId, setEditingTodoId] = useState('');
 
-  const [tempTodoLabel, setTempTodoLabel] = useState('');
-
   const filter = useMemo(() => router.pathname.slice(1), [router]) as ''|'active'|'completed';
   const filteredEntrys = useMemo(() => todoEntrys.filter(([, { checked }]) => {
     switch (filter) {
@@ -78,7 +76,6 @@ const Home: NextPage<{data: Session & {id: string}}> = ({data: session}) => {
       label: value,
     });
     setEditingTodoId('');
-    setTempTodoLabel('');
   }
 
   function editingTodo(docId: string) {
