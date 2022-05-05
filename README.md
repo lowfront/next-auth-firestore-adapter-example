@@ -4,7 +4,7 @@ Example of a firebase adapter that works with firebase authentication. A firebas
 
 1. Go to [firebase console](https://console.firebase.google.com/project) and select your project. 
 
-2. In `Project settings > Service accounts > Firebase Admin SDK`, for server, click "Generate new private key" and download "Generate Key" to root dir named `firebase.serviceAccountKey.json`
+2. In `Project settings > Service accounts > Firebase Admin SDK`, for server, click "Generate new private key" and download "Generate Key" and write it in the `FIREBASE_ADMIN_CONFIG_` key of `.env.local`.
 
 3. In `Project settings > General`, Click "Add app" at the bottom of the page, add a web app for frontend, and record the contents in the `.env.local` file.
 
