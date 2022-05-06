@@ -1,6 +1,9 @@
 import type { AppProps } from 'next/app';
 import Head from 'next/head';
 
+import 'todomvc-app-css/index.css';
+import 'todomvc-common/base.css';
+
 export default function MyApp({
   Component,
   pageProps: { session, ...pageProps },
