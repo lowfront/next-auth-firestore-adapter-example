@@ -78,12 +78,12 @@ export function validCustomToken(id: string) {
   return _getDoc(docRef);
 }
 
-export async function getUserDoc(id: string, ...paths: string[]) {
-  return doc(db, 'store', id, ...paths);
+export async function getUserDoc(email: string, ...paths: string[]) {
+  return doc(db, 'store', email, ...paths);
 }
 
-export async function getUserCollection(id: string, ...paths: string[]) {
-  return collection(db, 'store', id, ...paths);
+export async function getUserCollection(email: string, ...paths: string[]) {
+  return collection(db, 'store', email, ...paths);
 }
 
 export async function findOne(q: Query<DocumentData>): Promise<QueryDocumentSnapshot<DocumentData>|null> {

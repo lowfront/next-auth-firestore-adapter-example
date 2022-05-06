@@ -29,10 +29,12 @@ const Home: NextPage<{data: Session & {id: string}; todos: any[]}> = ({data: ses
 
   const leftTodoLength = useMemo(() => todoEntrys.reduce((acc, [id, {checked}]) => acc + (+!checked), 0), [todoEntrys]);
 
+  const email = useMemo(() => session?.user?.email ?? '', [session]);
+
   useEffect(() => {
     if (!session) return;
     (async () => {
-      const userCollectionRef = await getUserCollection(session.id, 'store');
+      const userCollectionRef = await getUserCollection(email, 'store');
       await signInFirebase();
 
       // https://github.com/firebase/firebase-js-sdk/issues/5629#issuecomment-945010156
@@ -64,14 +66,14 @@ const Home: NextPage<{data: Session & {id: string}; todos: any[]}> = ({data: ses
     const { value } = target;
     if (ev.key !== 'Enter' || !value) return;
     target.value = '';
-    const userCollectionRef = await getUserCollection(session.id, 'store');
+    const userCollectionRef = await getUserCollection(email, 'store');
     if (userCollectionRef) await addDoc(userCollectionRef, {
       checked: false,
       label: value,
     });
   }
   async function updateTodo(docId: string, ev: SyntheticEvent<HTMLInputElement>) {
-    const docRef = await getUserDoc(session.id, 'store', docId);
+    const docRef = await getUserDoc(email, 'store', docId);
     if (!docRef) return;
     const target = ev.target as HTMLInputElement;
     const { value } = target;
@@ -86,7 +88,7 @@ const Home: NextPage<{data: Session & {id: string}; todos: any[]}> = ({data: ses
   }
 
   async function toggleTodo(docId: string) {
-    const docRef = await getUserDoc(session.id, 'store', docId);
+    const docRef = await getUserDoc(email, 'store', docId);
     if (!docRef) return;
     const docSnap = await getDoc(docRef);
     const todo = docSnap.data() as Todo;
@@ -96,7 +98,7 @@ const Home: NextPage<{data: Session & {id: string}; todos: any[]}> = ({data: ses
   }
 
   async function toggleTodos() {
-    const userCollectionRef = await getUserCollection(session.id, 'store');
+    const userCollectionRef = await getUserCollection(email, 'store');
 
     if (leftTodoLength) {
       const q = query(userCollectionRef, where('checked', '==', false));
@@ -114,7 +116,7 @@ const Home: NextPage<{data: Session & {id: string}; todos: any[]}> = ({data: ses
   }
 
   async function removeTodo(docId: string) {
-    const docRef = await getUserDoc(session.id, 'store', docId);
+    const docRef = await getUserDoc(email, 'store', docId);
     if (docRef) await deleteDoc(docRef);
   }
 
@@ -166,7 +168,7 @@ export default Home;
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getSession(context);
-  const todoRefs = session ? await getTodoRefs(session?.id as string ?? '') : [];
+  const todoRefs = session ? await getTodoRefs(session?.user?.email as string ?? '') : [];
 
   return {
     props: {

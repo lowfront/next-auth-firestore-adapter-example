@@ -89,8 +89,8 @@ export function createFirebaseCustomTokenHandler({
   };
 }
 
-export async function getTodoRefs(userId: string) {
-  const docs = await db.collection('store').doc(userId).collection('store').get();
+export async function getTodoRefs(email: string) {
+  const docs = await db.collection('store').doc(email).collection('store').get();
   const result: QueryDocumentSnapshot<DocumentData>[] = [];
   docs.forEach(doc => result.push(doc));
   return result;

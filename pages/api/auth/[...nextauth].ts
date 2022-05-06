@@ -11,10 +11,4 @@ export default NextAuth({
     }),
   ],
   adapter: FirebaesAdapter(db),
-  callbacks: {
-    async session({ session, user, token }) {
-      session.id = user.id;
-      return session as Session;
-    },
-  },
 })
