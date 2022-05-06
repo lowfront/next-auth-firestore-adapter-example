@@ -2,8 +2,8 @@ import { getAuth } from "firebase-admin/auth";
 import admin, { ServiceAccount } from 'firebase-admin';
 import { DocumentData, getFirestore, QueryDocumentSnapshot } from 'firebase-admin/firestore';
 import { NextApiRequest, NextApiResponse } from "next";
-import { Session } from "next-auth";
 import { getSession } from "next-auth/react";
+import { Session } from "next-auth";
 
 // https://github.com/vercel/next.js/issues/1999#issuecomment-302244429
 if (!admin.apps.length) {
@@ -35,8 +35,8 @@ export type CustomToken = {
   expires: string; // date
 };
 
-export async function getToken(email: string) {
-  const tokenDocRef = db.collection('tokens').doc(email);
+export async function getCustomToken(email: string, sessionToken: string) {
+  const tokenDocRef = db.collection('tokens').doc(email).collection('sessions').doc(sessionToken);
   const tokenDoc = await tokenDocRef.get();
   if (!tokenDoc.exists) return;
   const { token, expires } = tokenDoc.data() as CustomToken;
@@ -44,8 +44,8 @@ export async function getToken(email: string) {
   return token;
 }
 
-export async function updateToken(email: string, token: string) {
-  const tokenDocRef = db.collection('tokens').doc(email);
+export async function updateCustomToken(email: string, sessionToken: string, token: string) {
+  const tokenDocRef = db.collection('tokens').doc(email).collection('sessions').doc(sessionToken);
 
   await tokenDocRef.set({
     token,
@@ -53,6 +53,10 @@ export async function updateToken(email: string, token: string) {
   });
 
   return token;
+}
+
+export function getSessionToken(req: NextApiRequest) {
+  return req.cookies['__Secure-next-auth.session-token'] ?? req.cookies['next-auth.session-token'];
 }
 
 export function createFirebaseCustomTokenHandler({
@@ -67,21 +71,19 @@ export function createFirebaseCustomTokenHandler({
     if (req.method !== method) return res.status(403).json(false);
     const session = await getSession({ req }) as Session;
     if (!session) return res.status(403).json(false);
-
+    const sessionToken = getSessionToken(req);
     const { user } = session as unknown as {
       user: NonNullable<Session['user']>;
     };
-    const email = user.email as string
-    let token = await getToken(email);
+    const email = user.email as string;
+    let token = await getCustomToken(email, sessionToken);
     if (token) return res.json(token);
   
     token = await admin
       .auth()
-      .createCustomToken(email, additionalClaims?.(session));
-    
-    // FIXEME: Tokens must be stored per session in array form for multi-device support
+      .createCustomToken(email, Object.assign({}, additionalClaims?.(session), { sessionToken }));
 
-    await updateToken(email, token);
+    await updateCustomToken(email, sessionToken, token);
   
     return res.json(token);
   };

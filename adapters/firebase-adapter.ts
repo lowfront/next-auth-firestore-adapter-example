@@ -18,6 +18,8 @@ export default function FirebaesAdapter(
   const sessionCollectionRef = db.collection(adapterCollectionName).doc('store').collection('session');
   const verificationTokenCollectionRef = db.collection(adapterCollectionName).doc('store').collection('verificationToken');
   
+  const sessionTokenCollectionRef = db.collection(adapterCollectionName).doc('store').collection('sessionToken');
+
   const findUserDoc = (key: string) => userCollectionRef.doc(key);
   const findAccountDoc = (key: string) => accountCollectionRef.doc(key);
   const findSessionDoc = (key: string) => sessionCollectionRef.doc(key);
@@ -37,6 +39,7 @@ export default function FirebaesAdapter(
         id: userRef.id,
         ...userData,
       } as AdapterUser;
+
       return user;
     },
     async getUser(id) {
@@ -126,7 +129,7 @@ export default function FirebaesAdapter(
       return {
         user: user,
         session: from(session),
-      }
+      };
     },
     async createSession(data) {
       const sessionData = {
@@ -139,6 +142,7 @@ export default function FirebaesAdapter(
         id: sessionRef.id,
         ...sessionData,
       } as AdapterSession;
+
       return session;
     },
     async updateSession(data) {
@@ -159,7 +163,7 @@ export default function FirebaesAdapter(
       
       await Promise.allSettled([
         findSessionDoc(sessionRef.id).delete(),
-        db.collection('tokens').doc(email).delete(),
+        db.collection('tokens').doc(email).collection('sessions').doc(sessionToken).delete(),
       ]);
     },
     async createVerificationToken(data) { // need test
