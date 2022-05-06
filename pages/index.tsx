@@ -10,10 +10,11 @@ import { useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import User from 'components/User';
+import { getTodoRefs } from 'lib/firebase-server';
 
-const Home: NextPage<{data: Session & {id: string}}> = ({data: session}) => {
+const Home: NextPage<{data: Session & {id: string}; todos: any[]}> = ({data: session, todos}) => {
   const router = useRouter();
-  const [todoEntrys, setTodoEntrys] = useState<[string, Todo][]>([]);
+  const [todoEntrys, setTodoEntrys] = useState<[string, Todo][]>(todos);
   const [editingTodoId, setEditingTodoId] = useState('');
 
   const filter = useMemo(() => router.pathname.slice(1), [router]) as ''|'active'|'completed';
@@ -171,9 +172,12 @@ export default Home;
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getSession(context);
+  const todoRefs = await getTodoRefs(session?.id as string ?? '');
+
   return {
     props: {
       data: session,
+      todos: todoRefs.map(doc => [doc.id, doc.data()]),
     }
   };
 }

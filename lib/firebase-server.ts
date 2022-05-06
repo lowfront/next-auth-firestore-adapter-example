@@ -1,6 +1,6 @@
 import { getAuth } from "firebase-admin/auth";
 import admin, { ServiceAccount } from 'firebase-admin';
-import { getFirestore } from 'firebase-admin/firestore';
+import { DocumentData, getFirestore, QueryDocumentSnapshot } from 'firebase-admin/firestore';
 import { NextApiRequest, NextApiResponse } from "next";
 import { Session } from "next-auth";
 import { getSession } from "next-auth/react";
@@ -83,4 +83,11 @@ export function createFirebaseCustomTokenHandler({
   
     return res.json(token);
   };
+}
+
+export async function getTodoRefs(userId: string) {
+  const docs = await db.collection('store').doc(userId).collection('store').get();
+  const result: QueryDocumentSnapshot<DocumentData>[] = [];
+  docs.forEach(doc => result.push(doc));
+  return result;
 }
