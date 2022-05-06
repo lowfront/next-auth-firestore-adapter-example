@@ -2,15 +2,16 @@ import { onSnapshot, query, where } from 'firebase/firestore'
 import { addDoc, deleteDoc, getDoc, updateDoc, findMany, getUserCollection, getUserDoc, signInFirebase } from 'lib/firebase-web';
 import type { GetServerSideProps, NextPage } from 'next'
 import { Session } from 'next-auth'
-import { getSession, signIn, signOut } from 'next-auth/react'
+import { getSession } from 'next-auth/react'
 import { KeyboardEvent, SyntheticEvent, useEffect, useState } from 'react'
 import Footer from 'components/Footer';
 import { Todo } from 'lib/types';
 import { useMemo } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import User from 'components/User';
 import { getTodoRefs } from 'lib/firebase-server';
+import TodoFooter from 'components/TodoFooter';
+import TodoLayout from 'components/TodoItem';
 
 const Home: NextPage<{data: Session & {id: string}; todos: any[]}> = ({data: session, todos}) => {
   const router = useRouter();
@@ -135,32 +136,25 @@ const Home: NextPage<{data: Session & {id: string}; todos: any[]}> = ({data: ses
             <input id="toggle-all" className="toggle-all" type="checkbox" checked={!leftTodoLength} onChange={toggleTodos} />
             <label htmlFor="toggle-all">Mark all as complete</label>
             <ul className="todo-list">
-              {filteredEntrys.map(([id, { checked, label }], i) => <li className={id === editingTodoId ? 'editing' : checked ? 'completed' : ''} onDoubleClick={() => editingTodo(id)} key={id}>
-                {id !== editingTodoId ? 
-                  <div className="view">
-                    <input className="toggle" type="checkbox" checked={checked} onChange={() => toggleTodo(id)} />
-                    <label>{label}</label>
-                    <button className="destroy" onClick={() => removeTodo(id)}></button>
-                  </div> :
-                  <input className="edit" defaultValue={label} autoFocus onBlur={(ev) => updateTodo(id, ev)} onKeyDown={ev => ev.key === 'Enter' && updateTodo(id, ev)} />}
-              </li>)}
+              {filteredEntrys.map(([id, { checked, label }], i) => 
+                <TodoLayout 
+                  id={id}
+                  checked={checked}
+                  label={label}
+                  editingTodoId={editingTodoId}
+                  onEditTodo={editingTodo}
+                  onToggleTodo={toggleTodo}
+                  onRemoveTodo={removeTodo}
+                  onUpdateTodo={updateTodo}
+                  key={id} />
+              )}
             </ul>
           </section>
-          {todoEntrys.length ? <footer className="footer">
-            <span className="todo-count"><strong>{leftTodoLength}</strong> item left</span>
-            <ul className="filters">
-              <li>
-                <Link href="/"><a className={filter === '' ? "selected" : ''}>All</a></Link>
-              </li>
-              <li>
-                <Link href="/active"><a className={filter === 'active' ? "selected" : ''}>Active</a></Link>
-              </li>
-              <li>
-                <Link href="/completed"><a className={filter === 'completed' ? "selected" : ''}>Completed</a></Link>
-              </li>
-            </ul>
-            <button className="clear-completed" onClick={clearCompletedTodo}>Clear completed</button>
-          </footer> : null}
+          <TodoFooter
+            todos={todoEntrys}
+            leftTodoLength={leftTodoLength}
+            filter={filter}
+            onClearCompleted={clearCompletedTodo} />
         </>}
       </section>
       <Footer />
