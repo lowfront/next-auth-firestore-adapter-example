@@ -47,8 +47,8 @@ export type CustomToken = {
   expires: string; // date
 };
 
-export async function getToken(email: string) { // For renewal after 1 hour, Always run in the order of getToken() > updateToken()
-  const tokenDocRef = db.collection('tokens').doc(email);
+export async function getCustomToken(email: string, sessionToken: string) {
+  const tokenDocRef = db.collection('tokens').doc(email).collection('sessions').doc(sessionToken);
   const tokenDoc = await tokenDocRef.get();
   if (!tokenDoc.exists) return;
   const { token, expires } = tokenDoc.data() as CustomToken;
@@ -56,8 +56,8 @@ export async function getToken(email: string) { // For renewal after 1 hour, Alw
   return token;
 }
 
-export async function updateToken(email: string, token: string) {
-  const tokenDocRef = db.collection('tokens').doc(email);
+export async function updateCustomToken(email: string, sessionToken: string, token: string) {
+  const tokenDocRef = db.collection('tokens').doc(email).collection('sessions').doc(sessionToken);
 
   await tokenDocRef.set({
     token,
