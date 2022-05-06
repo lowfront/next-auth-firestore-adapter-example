@@ -1,5 +1,5 @@
-import { addDoc, deleteDoc, getDoc, onSnapshot, query, updateDoc, where } from 'firebase/firestore'
-import { findMany, getUserCollection, getUserDoc } from 'lib/firebase-web';
+import { onSnapshot, query, where } from 'firebase/firestore'
+import { addDoc, deleteDoc, getDoc, updateDoc, findMany, getUserCollection, getUserDoc } from 'lib/firebase-web';
 import type { GetServerSideProps, NextPage } from 'next'
 import { Session } from 'next-auth'
 import { getSession, signIn, signOut } from 'next-auth/react'
