@@ -18,6 +18,7 @@ service cloud.firestore {
     }
     match /store/{userId}/{document=**} {
     	allow read, write: if request.auth.token.id == userId;
+          // && exists(/databases/$(database)/documents/tokens/$(request.auth.uid)); // After sign out, custom token is disabled to increase security, but database read costs are added for each task.
     }
   }
 }

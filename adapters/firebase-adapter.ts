@@ -153,7 +153,14 @@ export default function FirebaesAdapter(
       const q = sessionCollectionRef.where('sessionToken', '==', sessionToken).limit(1);
       const sessionRef = await findOne(q);
       if (!sessionRef) return;
-      await findSessionDoc(sessionRef.id).delete();
+
+      const userRef = (await findUserDoc(sessionRef.data().userId as string).get());
+      const email = userRef.data()?.email ?? '';
+      
+      await Promise.allSettled([
+        findSessionDoc(sessionRef.id).delete(),
+        db.collection('tokens').doc(email).delete(),
+      ]);
     },
     async createVerificationToken(data) { // need test
       const verificationTokenRef = await verificationTokenCollectionRef.add(data);
