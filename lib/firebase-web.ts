@@ -29,15 +29,20 @@ export const analytics = (() => {
 })();
 export const db = getFirestore(app);
 
-export async function trySignInWithCustomToken<T>(f: (() => Promise<T>)|Promise<T>) {
+export async function signInFirebase() {
+  const token = await ky.get('/api/auth/token').text();
+  await signInWithCustomToken(auth, token);
+}
+
+export async function trySignInWithCustomToken<T>(f?: (() => Promise<T>)|Promise<T>) {
   let failCount = 3;
+  
   while (failCount--) {
     try {
       return await (typeof f === 'function' ? f() : f);
     } catch (err: any) {
       console.error(err);
-      const token = await ky.get('/api/auth/token').text();
-      await signInWithCustomToken(auth, token);
+      await signInFirebase();
     }
   }
   

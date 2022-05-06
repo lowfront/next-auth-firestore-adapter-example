@@ -1,5 +1,5 @@
 import { onSnapshot, query, where } from 'firebase/firestore'
-import { addDoc, deleteDoc, getDoc, updateDoc, findMany, getUserCollection, getUserDoc } from 'lib/firebase-web';
+import { addDoc, deleteDoc, getDoc, updateDoc, findMany, getUserCollection, getUserDoc, signInFirebase } from 'lib/firebase-web';
 import type { GetServerSideProps, NextPage } from 'next'
 import { Session } from 'next-auth'
 import { getSession, signIn, signOut } from 'next-auth/react'
@@ -9,6 +9,7 @@ import { Todo } from 'lib/types';
 import { useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import User from 'components/User';
 
 const Home: NextPage<{data: Session & {id: string}}> = ({data: session}) => {
   const router = useRouter();
@@ -30,6 +31,7 @@ const Home: NextPage<{data: Session & {id: string}}> = ({data: session}) => {
     if (!session) return;
     (async () => {
       const userCollectionRef = await getUserCollection(session.id, 'store');
+      await signInFirebase();
 
       // https://github.com/firebase/firebase-js-sdk/issues/5629#issuecomment-945010156
       const unsub = onSnapshot(userCollectionRef, { includeMetadataChanges: true }, (snap) => {
@@ -121,39 +123,7 @@ const Home: NextPage<{data: Session & {id: string}}> = ({data: session}) => {
 
   return (
     <>
-      {!session ?
-        <div>
-          <span>
-            You are not signed in
-          </span>
-          {' '}
-          <a
-            href={`/api/auth/signin`}
-            onClick={(e) => {
-              e.preventDefault()
-              signIn('google')
-            }}
-          >
-            Sign in
-          </a>
-        </div> :
-        <div>
-        <span>
-          <small>Signed in as</small>
-          <br />
-          <strong>{session?.user?.email ?? ''}</strong>
-        </span>
-        {' '}
-        <a
-          href={`/api/auth/signout`}
-          onClick={(e) => {
-            e.preventDefault()
-            signOut()
-          }}
-        >
-          Sign out
-        </a>
-      </div>}
+      <User session={session} />
       <section className="todoapp">
         <h1>todos</h1>
         {session?.user && <>
