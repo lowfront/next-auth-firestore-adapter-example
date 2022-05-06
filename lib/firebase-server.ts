@@ -79,6 +79,8 @@ export function createFirebaseCustomTokenHandler({
       .auth()
       .createCustomToken(email, additionalClaims?.(session));
     
+    // FIXEME: Tokens must be stored per session in array form for multi-device support
+
     await updateToken(email, token);
   
     return res.json(token);
