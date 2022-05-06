@@ -37,13 +37,7 @@ export default NextAuth({
     }),
   ],
   adapter: FirebaesAdapter(db),
-  callbacks: {
-    session: async ({ session, user }) => {
-       session.id = user.id;
-       return session as Session;
-    }
-  },
-})
+});
 ```
 
 6. Add custom token endpoint to `pages/api/auth/token.ts`.
@@ -73,26 +67,30 @@ export async function updateToken(email: string, token: string) {
   return token;
 }
 
-return async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method !== 'get') return res.status(403).json(false);
-    const session = await getSession({ req }) as Session;
-    if (!session) return res.status(403).json(false);
+export function getSessionToken(req: NextApiRequest) {
+  return req.cookies['__Secure-next-auth.session-token'] ?? req.cookies['next-auth.session-token'];
+}
 
-    const { user } = session as unknown as {
-      user: NonNullable<Session['user']>;
-    };
-    const email = user.email as string
-    let token = await getToken(email);
-    if (token) return res.json(token);
-  
-    token = await admin
-      .auth()
-      .createCustomToken(email, { id: session?.id ?? null });
-    
-    await updateToken(email, token);
-  
-    return res.json(token);
+return async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== method) return res.status(403).json(false);
+  const session = await getSession({ req }) as Session;
+  if (!session) return res.status(403).json(false);
+  const sessionToken = getSessionToken(req);
+  const { user } = session as unknown as {
+    user: NonNullable<Session['user']>;
   };
+  const email = user.email as string;
+  let token = await getCustomToken(email, sessionToken);
+  if (token) return res.json(token);
+
+  token = await admin
+    .auth()
+    .createCustomToken(email, Object.assign({}, additionalClaims?.(session), { sessionToken }));
+
+  await updateCustomToken(email, sessionToken, token);
+
+  return res.json(token);
+};
 ```
 
 6. Run `npm run dev`
