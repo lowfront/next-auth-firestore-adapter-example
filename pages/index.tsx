@@ -172,7 +172,7 @@ export default Home;
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await getSession(context);
-  const todoRefs = await getTodoRefs(session?.id as string ?? '');
+  const todoRefs = session ? await getTodoRefs(session?.id as string ?? '') : [];
 
   return {
     props: {
