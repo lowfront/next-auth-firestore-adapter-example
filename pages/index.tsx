@@ -9,7 +9,7 @@ import { Todo } from 'lib/types';
 import { useMemo } from 'react';
 import { useRouter } from 'next/router';
 import User from 'components/User';
-import { getTodoRefs } from 'lib/firebase-server';
+import { getTodoRefs } from 'lib/server-side-functions';
 import TodoFooter from 'components/TodoFooter';
 import TodoLayout from 'components/TodoItem';
 
@@ -166,7 +166,7 @@ const Home: NextPage<{data: Session & {id: string}; todos: any[]}> = ({data: ses
 
 export default Home;
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
+export const getServerSideProps: GetServerSideProps = async (context) => { // It's a lot of time every page.
   const session = await getSession(context);
   const todoRefs = session ? await getTodoRefs(session?.user?.email as string ?? '') : [];
 
