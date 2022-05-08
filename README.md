@@ -95,4 +95,4 @@ return async function handler(req: NextApiRequest, res: NextApiResponse) {
 
 6. Run `npm run dev`
 
-Now use your firebase data in the client, or even if the firebaseConfig is exposed, the data in the next-auth is protected private.
+Now use your firebase data in the client, or even if the firebaseConfig is exposed, the data in the next-auth is protected private. If an commented rule is added, customToken issued after sign out is not available.
