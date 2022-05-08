@@ -4,6 +4,7 @@ import { getAuth, signInWithCustomToken } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore, doc, addDoc as _addDoc, getDoc as _getDoc, getDocs as _getDocs, setDoc as _setDoc, updateDoc as _updateDoc, deleteDoc as _deleteDoc, collection, Query, DocumentData, QueryDocumentSnapshot, DocumentReference, WithFieldValue } from "firebase/firestore";
 import ky from "ky";
+import { sleep } from "./utils";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -34,7 +35,7 @@ export async function signInFirebase() {
   await signInWithCustomToken(auth, token);
 }
 
-export async function trySignInWithCustomToken<T>(f?: (() => Promise<T>)|Promise<T>) {
+export async function trySignInWithCustomToken<T>(f?: (() => Promise<T>)|Promise<T>) { // If try continuously, it appears to fail...
   let failCount = 3;
   
   while (failCount--) {
@@ -44,6 +45,7 @@ export async function trySignInWithCustomToken<T>(f?: (() => Promise<T>)|Promise
       console.error(err);
       await signInFirebase();
     }
+    await sleep(100);
   }
   
   throw new Error('Fail sign in with custom token.');
