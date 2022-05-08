@@ -28,3 +28,32 @@ export function from<T = Record<string, unknown>>(object: Record<string, any>): 
   }
   return newObject as T
 }
+
+export function asyncMap<T>(promiseFns: (() => Promise<T>)[], max: number) {
+  const result: T[] = [];
+
+  let count = 0;
+  let cursor = 0;
+
+  return new Promise(res => {
+    function run() {
+      while (count < max && cursor < promiseFns.length) {
+        count++;
+        const index = cursor++;
+        promiseFns[index]()
+          .then((value) => {
+            result[index] = value;
+          }, rej => console.log(rej))
+          .catch(err => console.error(err))
+          .finally(() => {
+            run();
+            count--;
+  
+            if (!count) res(result);
+          });
+      }
+    }
+  
+    run();
+  });
+}

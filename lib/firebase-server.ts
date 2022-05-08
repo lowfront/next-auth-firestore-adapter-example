@@ -1,9 +1,11 @@
 import { getAuth } from "firebase-admin/auth";
 import admin, { ServiceAccount } from 'firebase-admin';
-import { DocumentData, getFirestore, QueryDocumentSnapshot } from 'firebase-admin/firestore';
+import { getFirestore } from 'firebase-admin/firestore';
 import { NextApiRequest, NextApiResponse } from "next";
 import { getSession } from "next-auth/react";
 import { Session } from "next-auth";
+import { asyncMap, findMany } from "adapters/utils";
+import FirebaesAdapter from "adapters/firebase-adapter";
 
 // https://github.com/vercel/next.js/issues/1999#issuecomment-302244429
 if (!admin.apps.length) {
@@ -89,9 +91,10 @@ export function createFirebaseCustomTokenHandler({
   };
 }
 
-export async function getTodoRefs(email: string) {
-  const docs = await db.collection('store').doc(email).collection('store').get();
-  const result: QueryDocumentSnapshot<DocumentData>[] = [];
-  docs.forEach(doc => result.push(doc));
-  return result;
+export async function removeExpiredSessions(limit: number = 100, asyncMax: number = 30) { // Expired session deletion function, used for cron or api
+  const adapter = FirebaesAdapter(db);
+  
+  const q = db.collection('_next_auth_firestore_adapter_').doc('store').collection('session').where('expires', '<', new Date()).limit(limit);
+  const expiredSessionDocs = await findMany(q);
+  await asyncMap(expiredSessionDocs.map(doc => () => adapter.deleteSession(doc.data().sessionToken) as Promise<void>), asyncMax);
 }
