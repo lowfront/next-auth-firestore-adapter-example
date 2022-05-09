@@ -81,7 +81,7 @@ export default function FirebaseAdapter(
     },
     async updateUser(data) {
       const { id, ...userData } = data;
-      findUserDoc(id as string).set(userData);
+      await findUserDoc(id as string).set(userData);
       const user = data as AdapterUser;
       return user;
     },
