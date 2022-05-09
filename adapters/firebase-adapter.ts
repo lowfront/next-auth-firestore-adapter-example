@@ -7,7 +7,7 @@ export type FirebaseAdapterProps = {
   adapterCollectionName?: string;
 }
 
-export default function FirebaesAdapter(
+export default function FirebaseAdapter(
   db: Firestore,
   options: FirebaseAdapterProps = {},
 ): Adapter {  
