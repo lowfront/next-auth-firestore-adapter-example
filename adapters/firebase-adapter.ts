@@ -86,10 +86,7 @@ export default function FirebaseAdapter(
       return user;
     },
     async deleteUser(id) {
-      const q = userCollectionRef.where('id', '==', id).limit(1);
-      const userRef = await findOne(q);
-      if (!userRef) return;
-      await findUserDoc(userRef.id).delete();
+      await findUserDoc(id).delete();
     },
     async linkAccount(data) {
       const accountData = data;
