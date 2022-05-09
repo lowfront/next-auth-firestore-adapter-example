@@ -9,7 +9,7 @@ import { Todo } from 'lib/types';
 import { useMemo } from 'react';
 import { useRouter } from 'next/router';
 import User from 'components/User';
-import { getTodoRefs } from 'lib/server-side-functions';
+import { getTodoRefs } from 'lib/Todo/todo.controller';
 import TodoFooter from 'components/TodoFooter';
 import TodoLayout from 'components/TodoItem';
 
