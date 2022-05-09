@@ -3,7 +3,6 @@ import { initializeApp } from "firebase/app";
 import { getAuth, signInWithCustomToken } from "firebase/auth";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore, doc, addDoc as _addDoc, getDoc as _getDoc, getDocs as _getDocs, setDoc as _setDoc, updateDoc as _updateDoc, deleteDoc as _deleteDoc, collection, Query, DocumentData, QueryDocumentSnapshot, DocumentReference, WithFieldValue } from "firebase/firestore";
-import ky from "ky";
 import { sleep } from "./utils";
 
 // TODO: Add SDKs for Firebase products that you want to use
@@ -31,7 +30,7 @@ export const analytics = (() => {
 export const db = getFirestore(app);
 
 export async function signInFirebase() {
-  const token = await ky.get('/api/auth/token').text();
+  const token = await fetch('/api/auth/token').then(res => res.text());
   await signInWithCustomToken(auth, token);
 }
 

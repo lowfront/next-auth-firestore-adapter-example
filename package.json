@@ -1,6 +1,6 @@
 {
   "name": "next-auth-firebase-adapter-example",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -13,7 +13,6 @@
     "classnames": "^2.3.1",
     "firebase": "^9.7.0",
     "firebase-admin": "^10.1.0",
-    "ky": "^0.30.0",
     "next": "12.1.5",
     "next-auth": "^4.3.4",
     "react": "18.1.0",
