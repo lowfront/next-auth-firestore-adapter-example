@@ -1,6 +1,6 @@
 import NextAuth, { Session } from "next-auth"
 import GoogleProvider from "next-auth/providers/google"
-import FirebaesAdapter from "adapters/firebase-adapter"
+import FirebaseAdapter from "adapters/firebase-adapter"
 import { db } from "lib/firebase-server"
 
 export default NextAuth({
@@ -10,5 +10,5 @@ export default NextAuth({
       clientSecret: process.env.GOOGLE_SECRET,
     }),
   ],
-  adapter: FirebaesAdapter(db),
+  adapter: FirebaseAdapter(db),
 })
