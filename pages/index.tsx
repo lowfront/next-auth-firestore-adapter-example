@@ -12,9 +12,11 @@ import User from 'components/User';
 import { getTodoRefs } from 'lib/Todo/todo.controller';
 import TodoFooter from 'components/TodoFooter';
 import TodoLayout from 'components/TodoItem';
+import Loading from 'components/Loading';
 
 const Home: NextPage<{data: Session & {id: string}; todos: any[]}> = ({data: session, todos}) => {
   const router = useRouter();
+  const [loading, setLoading] = useState(!!session);
   const [todoEntrys, setTodoEntrys] = useState<[string, Todo][]>(todos);
   const [editingTodoId, setEditingTodoId] = useState('');
 
@@ -31,11 +33,13 @@ const Home: NextPage<{data: Session & {id: string}; todos: any[]}> = ({data: ses
 
   const email = useMemo(() => session?.user?.email ?? '', [session]);
 
+
   useEffect(() => {
-    if (!session) return;
+    if (!session) return; // FIXME: load session;
     (async () => {
-      const userCollectionRef = await getUserCollection(email, 'store');
-      await signInFirebase();
+      const userCollectionRef = getUserCollection(email, 'store');
+      await signInFirebase(); // loading;
+      setLoading(false);
 
       // https://github.com/firebase/firebase-js-sdk/issues/5629#issuecomment-945010156
       const unsub = onSnapshot(userCollectionRef, { includeMetadataChanges: true }, (snap) => {
@@ -127,6 +131,7 @@ const Home: NextPage<{data: Session & {id: string}; todos: any[]}> = ({data: ses
 
   return (
     <>
+      <Loading block={loading} />
       <User session={session} />
       <section className="todoapp">
         <h1>todos</h1>
