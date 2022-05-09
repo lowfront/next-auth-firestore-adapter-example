@@ -1,6 +1,6 @@
-import { PropsWithChildren, SyntheticEvent } from "react";
+import { PropsWithoutRef, SyntheticEvent } from "react";
 
-export type TodoLayoutProps = PropsWithChildren<{
+export type TodoLayoutProps = PropsWithoutRef<{
   id: string;
   checked: boolean;
   label: string;

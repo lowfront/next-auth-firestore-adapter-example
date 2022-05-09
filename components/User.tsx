@@ -1,8 +1,8 @@
 import { Session } from "next-auth";
 import { signIn, signOut } from "next-auth/react";
-import { PropsWithChildren, SyntheticEvent } from "react";
+import { PropsWithoutRef, SyntheticEvent } from "react";
 
-export default function User({session}: PropsWithChildren<{session: Session}>) {
+export default function User({session}: PropsWithoutRef<{session: Session}>) {
 
   function signOutHandler(ev: SyntheticEvent) {
     ev.preventDefault();

@@ -1,8 +1,8 @@
 import { Todo } from "lib/types";
 import Link from "next/link";
-import { PropsWithChildren } from "react";
+import { PropsWithoutRef } from "react";
 
-export type TodoFooterProps = PropsWithChildren<{
+export type TodoFooterProps = PropsWithoutRef<{
   todos: [string, Todo][];
   leftTodoLength: number;
   filter: '' | 'active' | 'completed';
