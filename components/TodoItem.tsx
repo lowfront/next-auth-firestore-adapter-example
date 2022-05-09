@@ -1,3 +1,4 @@
+import cn from "classnames";
 import { PropsWithoutRef, SyntheticEvent } from "react";
 
 export type TodoLayoutProps = PropsWithoutRef<{
@@ -12,7 +13,10 @@ export type TodoLayoutProps = PropsWithoutRef<{
 }>;
 
 export default function TodoLayout({id, checked, label, editingTodoId, onEditTodo, onToggleTodo, onRemoveTodo, onUpdateTodo}: TodoLayoutProps) {
-  return <li className={id === editingTodoId ? 'editing' : checked ? 'completed' : ''} onDoubleClick={() => onEditTodo(id)} key={id}>
+  return <li className={cn({
+    'editing': id === editingTodoId,
+    'completed': checked,
+  })} onDoubleClick={() => onEditTodo(id)} key={id}>
     {id !== editingTodoId ? 
       <div className="view">
         <input className="toggle" type="checkbox" checked={checked} onChange={() => onToggleTodo(id)} />

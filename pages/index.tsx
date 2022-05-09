@@ -5,7 +5,7 @@ import { Session } from 'next-auth'
 import { getSession } from 'next-auth/react'
 import { KeyboardEvent, SyntheticEvent, useEffect, useState } from 'react'
 import Footer from 'components/Footer';
-import { Todo } from 'lib/types';
+import { Todo, TodoFilter } from 'lib/types';
 import { useMemo } from 'react';
 import { useRouter } from 'next/router';
 import User from 'components/User';
@@ -20,12 +20,17 @@ const Home: NextPage<{data: Session & {id: string}; todos: any[]}> = ({data: ses
   const [todoEntrys, setTodoEntrys] = useState<[string, Todo][]>(todos);
   const [editingTodoId, setEditingTodoId] = useState('');
 
-  const filter = useMemo(() => router.pathname.slice(1), [router]) as ''|'active'|'completed';
+  const filter = useMemo(() => {
+    const pathname = router.pathname.slice(1);
+    if (!pathname) return TodoFilter.all;
+    return TodoFilter[pathname as any];
+  }, [router]) as TodoFilter;
+
   const filteredEntrys = useMemo(() => todoEntrys.filter(([, { checked }]) => {
     switch (filter) {
-    case '': return true;
-    case 'active': return !checked;
-    case 'completed': return checked;
+    case TodoFilter.all: return true;
+    case TodoFilter.active: return !checked;
+    case TodoFilter.completed: return checked;
     }
   }), [filter, todoEntrys]);
 
