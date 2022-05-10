@@ -51,27 +51,27 @@ export async function trySignInWithCustomToken<T>(f?: (() => Promise<T>)|Promise
 }
 
 export const addDoc = ((reference, data) => {
-  return trySignInWithCustomToken(_addDoc(reference, data));
+  return trySignInWithCustomToken(() => _addDoc(reference, data));
 }) as typeof _addDoc;
 
 export const getDoc = (reference => {
-  return trySignInWithCustomToken(_getDoc(reference));
+  return trySignInWithCustomToken(() => _getDoc(reference));
 }) as typeof _getDoc;
 
 export const getDocs = (reference => {
-  return trySignInWithCustomToken(_getDocs(reference));
+  return trySignInWithCustomToken(() => _getDocs(reference));
 }) as typeof _getDocs;
 
 export const setDoc = ((reference, data, options) => {
-  return trySignInWithCustomToken(_setDoc(reference, data, options));
+  return trySignInWithCustomToken(() => _setDoc(reference, data, options));
 }) as typeof _setDoc;
 
 export const updateDoc = ((reference, field, value, ...moreFieldsAndValues) => {
-  return trySignInWithCustomToken(_updateDoc(reference, field, value, ...moreFieldsAndValues));
+  return trySignInWithCustomToken(() => _updateDoc(reference, field, value, ...moreFieldsAndValues));
 }) as typeof _updateDoc;
 
 export const deleteDoc = (reference => {
-  return trySignInWithCustomToken(_deleteDoc(reference));
+  return trySignInWithCustomToken(() => _deleteDoc(reference));
 }) as typeof _deleteDoc;
 
 export function validCustomToken(id: string) {
