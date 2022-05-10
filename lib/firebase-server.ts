@@ -37,8 +37,8 @@ export type CustomToken = {
   expires: string; // date
 };
 
-export async function getCustomToken(email: string, sessionToken: string) {
-  const tokenDocRef = db.collection('_next_auth_firestore_adapter_').doc('store').collection('customToken').doc(email).collection('session').doc(sessionToken);
+export async function getCustomToken(sessionToken: string) {
+  const tokenDocRef = db.collection('_next_auth_firestore_adapter_').doc('store').collection('customToken').doc(sessionToken);
   const tokenDoc = await tokenDocRef.get();
   if (!tokenDoc.exists) return;
   const { token, expires } = tokenDoc.data() as CustomToken;
@@ -46,8 +46,8 @@ export async function getCustomToken(email: string, sessionToken: string) {
   return token;
 }
 
-export async function updateCustomToken(email: string, sessionToken: string, token: string) {
-  const tokenDocRef = db.collection('_next_auth_firestore_adapter_').doc('store').collection('customToken').doc(email).collection('session').doc(sessionToken);
+export async function updateCustomToken(sessionToken: string, token: string) {
+  const tokenDocRef = db.collection('_next_auth_firestore_adapter_').doc('store').collection('customToken').doc(sessionToken);
 
   await tokenDocRef.set({
     token,
@@ -78,14 +78,14 @@ export function createFirebaseCustomTokenHandler({
       user: NonNullable<Session['user']>;
     };
     const email = user.email as string;
-    let token = await getCustomToken(email, sessionToken);
+    let token = await getCustomToken(sessionToken);
     if (token) return res.json(token);
   
     token = await admin
       .auth()
       .createCustomToken(email, Object.assign({}, additionalClaims?.(session), { sessionToken }));
 
-    await updateCustomToken(email, sessionToken, token);
+    await updateCustomToken(sessionToken, token);
   
     return res.json(token);
   };

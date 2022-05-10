@@ -11,11 +11,9 @@ firestore root
 │     ├── session [collection] # session scheme from next-auth
 │     ├── user [collection] # user scheme from next-auth
 │     └── customToken [collection]
-│        └── <user email> [document]
-│           └── session [collection]
-│              └── <session token> [document] # same as session token in next-auth and when issuing custom token, it is included in additional claims.
-│                 ├── exires [field]
-│                 └── token [field]
+│        └── <session token> [document] # same as session token in next-auth and when issuing custom token, it is included in additional claims.
+│           ├── exires [field]
+│           └── token [field]
 └── store [collection]
    └── <user email> [document]
       └── store [collection]
@@ -69,8 +67,8 @@ export type CustomToken = {
   expires: string; // date
 };
 
-export async function getCustomToken(email: string, sessionToken: string) {
-  const tokenDocRef = db.collection('tokens').doc(email).collection('sessions').doc(sessionToken);
+export async function getCustomToken(sessionToken: string) {
+  const tokenDocRef = db.collection('_next_auth_firestore_adapter_').doc('store').collection('customToken').doc(sessionToken);
   const tokenDoc = await tokenDocRef.get();
   if (!tokenDoc.exists) return;
   const { token, expires } = tokenDoc.data() as CustomToken;
@@ -78,8 +76,8 @@ export async function getCustomToken(email: string, sessionToken: string) {
   return token;
 }
 
-export async function updateCustomToken(email: string, sessionToken: string, token: string) {
-  const tokenDocRef = db.collection('tokens').doc(email).collection('sessions').doc(sessionToken);
+export async function updateCustomToken(sessionToken: string, token: string) {
+  const tokenDocRef = db.collection('_next_auth_firestore_adapter_').doc('store').collection('customToken').doc(sessionToken);
 
   await tokenDocRef.set({
     token,
@@ -93,8 +91,8 @@ export function getSessionToken(req: NextApiRequest) {
   return req.cookies['__Secure-next-auth.session-token'] ?? req.cookies['next-auth.session-token'];
 }
 
-return async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== method) return res.status(403).json(false);
+async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'GET') return res.status(403).json(false);
   const session = await getSession({ req }) as Session;
   if (!session) return res.status(403).json(false);
   const sessionToken = getSessionToken(req);
@@ -102,14 +100,14 @@ return async function handler(req: NextApiRequest, res: NextApiResponse) {
     user: NonNullable<Session['user']>;
   };
   const email = user.email as string;
-  let token = await getCustomToken(email, sessionToken);
+  let token = await getCustomToken(sessionToken);
   if (token) return res.json(token);
 
   token = await admin
     .auth()
     .createCustomToken(email, Object.assign({}, additionalClaims?.(session), { sessionToken }));
 
-  await updateCustomToken(email, sessionToken, token);
+  await updateCustomToken(sessionToken, token);
 
   return res.json(token);
 };

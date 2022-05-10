@@ -23,7 +23,7 @@ export default function FirebaseAdapter(
   const findAccountDoc = (key: string) => accountCollectionRef.doc(key);
   const findSessionDoc = (key: string) => sessionCollectionRef.doc(key);
   const findVerificationTokenDoc = (key: string) => verificationTokenCollectionRef.doc(key);
-  const findCustomTokenDoc = (key: string, sessionToken: string) => customTokenCollectionRef.doc(key).collection('session').doc(sessionToken);
+  const findCustomTokenDoc = (sessionToken: string) => customTokenCollectionRef.doc(sessionToken);
 
   return {
     async createUser(data) {
@@ -160,7 +160,7 @@ export default function FirebaseAdapter(
       
       await Promise.allSettled([
         findSessionDoc(sessionRef.id).delete(),
-        findCustomTokenDoc(email, sessionToken).delete(),
+        findCustomTokenDoc(sessionToken).delete(),
       ]);
     },
     async createVerificationToken(data) { // need test
