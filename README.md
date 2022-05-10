@@ -40,7 +40,7 @@ service cloud.firestore {
     }
     match /store/{userId}/{document=**} {
     	allow read, write: if request.auth.token.id == userId;
-// && exists(/databases/$(database)/documents/tokens/$(request.auth.uid)/sessions/$(request.auth.token.sessionToken)); // To enhance security, after sign out, the issued custom token is deactivated and has a session method security level, but database read costs are added for each task.
+// && exists(/databases/$(database)/documents/_next_auth_firestore_adapter_/store/customToken/$(request.auth.uid)/session/$(request.auth.token.sessionToken)); // To enhance security, after sign out, the issued custom token is deactivated and has a session method security level, but database read costs are added for each task.
     }
   }
 }
