@@ -5,7 +5,7 @@ Example of a firebase adapter that works with firebase authentication. A firebas
 ### Database Structure
 ```
 firestore root
-├── _next_auth_firestore_adapter_ [collection]
+├── _next_auth_firebase_adapter_ [collection]
 │  └── store [document]
 │     ├── account [collection] # account scheme from next-auth
 │     ├── session [collection] # session scheme from next-auth
@@ -38,7 +38,7 @@ service cloud.firestore {
     }
     match /store/{userId}/{document=**} {
     	allow read, write: if request.auth.token.id == userId;
-// && exists(/databases/$(database)/documents/_next_auth_firestore_adapter_/store/customToken/$(request.auth.token.sessionToken)); // To enhance security, after sign out, the issued custom token is deactivated and has a session method security level, but database read costs are added for each task.
+// && exists(/databases/$(database)/documents/_next_auth_firebase_adapter_/store/customToken/$(request.auth.token.sessionToken)); // To enhance security, after sign out, the issued custom token is deactivated and has a session method security level, but database read costs are added for each task.
     }
   }
 }
@@ -68,7 +68,7 @@ export type CustomToken = {
 };
 
 export async function getCustomToken(sessionToken: string) {
-  const tokenDocRef = db.collection('_next_auth_firestore_adapter_').doc('store').collection('customToken').doc(sessionToken);
+  const tokenDocRef = db.collection('_next_auth_firebase_adapter_').doc('store').collection('customToken').doc(sessionToken);
   const tokenDoc = await tokenDocRef.get();
   if (!tokenDoc.exists) return;
   const { token, expires } = tokenDoc.data() as CustomToken;
@@ -77,7 +77,7 @@ export async function getCustomToken(sessionToken: string) {
 }
 
 export async function updateCustomToken(sessionToken: string, token: string) {
-  const tokenDocRef = db.collection('_next_auth_firestore_adapter_').doc('store').collection('customToken').doc(sessionToken);
+  const tokenDocRef = db.collection('_next_auth_firebase_adapter_').doc('store').collection('customToken').doc(sessionToken);
 
   await tokenDocRef.set({
     token,

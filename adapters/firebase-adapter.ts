@@ -11,7 +11,7 @@ export default function FirebaseAdapter(
   db: Firestore,
   options: FirebaseAdapterProps = {},
 ): Adapter {  
-  const adapterCollectionName = options.adapterCollectionName ?? '_next_auth_firestore_adapter_';
+  const adapterCollectionName = options.adapterCollectionName ?? '_next_auth_firebase_adapter_';
 
   const userCollectionRef = db.collection(adapterCollectionName).doc('store').collection('user');
   const accountCollectionRef = db.collection(adapterCollectionName).doc('store').collection('account');

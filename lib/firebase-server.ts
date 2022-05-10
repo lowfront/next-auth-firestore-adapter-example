@@ -38,7 +38,7 @@ export type CustomToken = {
 };
 
 export async function getCustomToken(sessionToken: string) {
-  const tokenDocRef = db.collection('_next_auth_firestore_adapter_').doc('store').collection('customToken').doc(sessionToken);
+  const tokenDocRef = db.collection('_next_auth_firebase_adapter_').doc('store').collection('customToken').doc(sessionToken);
   const tokenDoc = await tokenDocRef.get();
   if (!tokenDoc.exists) return;
   const { token, expires } = tokenDoc.data() as CustomToken;
@@ -47,7 +47,7 @@ export async function getCustomToken(sessionToken: string) {
 }
 
 export async function updateCustomToken(sessionToken: string, token: string) {
-  const tokenDocRef = db.collection('_next_auth_firestore_adapter_').doc('store').collection('customToken').doc(sessionToken);
+  const tokenDocRef = db.collection('_next_auth_firebase_adapter_').doc('store').collection('customToken').doc(sessionToken);
 
   await tokenDocRef.set({
     token,
@@ -94,7 +94,7 @@ export function createFirebaseCustomTokenHandler({
 export async function removeExpiredSessions(limit: number = 100, asyncMax: number = 30) { // Expired session deletion function, used for cron or api
   const adapter = FirebaseAdapter(db);
   
-  const q = db.collection('_next_auth_firestore_adapter_').doc('store').collection('session').where('expires', '<', new Date()).limit(limit);
+  const q = db.collection('_next_auth_firebase_adapter_').doc('store').collection('session').where('expires', '<', new Date()).limit(limit);
   const expiredSessionDocs = await findMany(q);
   await asyncMap(expiredSessionDocs.map(doc => () => adapter.deleteSession(doc.data().sessionToken) as Promise<void>), asyncMax);
 }
