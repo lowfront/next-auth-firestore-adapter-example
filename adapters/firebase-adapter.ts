@@ -17,13 +17,13 @@ export default function FirebaseAdapter(
   const accountCollectionRef = db.collection(adapterCollectionName).doc('store').collection('account');
   const sessionCollectionRef = db.collection(adapterCollectionName).doc('store').collection('session');
   const verificationTokenCollectionRef = db.collection(adapterCollectionName).doc('store').collection('verificationToken');
-  
-  const sessionTokenCollectionRef = db.collection(adapterCollectionName).doc('store').collection('sessionToken');
+  const customTokenCollectionRef = db.collection(adapterCollectionName).doc('store').collection('customToken');
 
   const findUserDoc = (key: string) => userCollectionRef.doc(key);
   const findAccountDoc = (key: string) => accountCollectionRef.doc(key);
   const findSessionDoc = (key: string) => sessionCollectionRef.doc(key);
   const findVerificationTokenDoc = (key: string) => verificationTokenCollectionRef.doc(key);
+  const findCustomTokenDoc = (key: string, sessionToken: string) => customTokenCollectionRef.doc(key).collection('session').doc(sessionToken);
 
   return {
     async createUser(data) {
@@ -160,7 +160,7 @@ export default function FirebaseAdapter(
       
       await Promise.allSettled([
         findSessionDoc(sessionRef.id).delete(),
-        db.collection('tokens').doc(email).collection('sessions').doc(sessionToken).delete(),
+        findCustomTokenDoc(email, sessionToken).delete(),
       ]);
     },
     async createVerificationToken(data) { // need test

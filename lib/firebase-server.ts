@@ -38,7 +38,7 @@ export type CustomToken = {
 };
 
 export async function getCustomToken(email: string, sessionToken: string) {
-  const tokenDocRef = db.collection('tokens').doc(email).collection('sessions').doc(sessionToken);
+  const tokenDocRef = db.collection('_next_auth_firestore_adapter_').doc('store').collection('customToken').doc(email).collection('session').doc(sessionToken);
   const tokenDoc = await tokenDocRef.get();
   if (!tokenDoc.exists) return;
   const { token, expires } = tokenDoc.data() as CustomToken;
@@ -47,7 +47,7 @@ export async function getCustomToken(email: string, sessionToken: string) {
 }
 
 export async function updateCustomToken(email: string, sessionToken: string, token: string) {
-  const tokenDocRef = db.collection('tokens').doc(email).collection('sessions').doc(sessionToken);
+  const tokenDocRef = db.collection('_next_auth_firestore_adapter_').doc('store').collection('customToken').doc(email).collection('session').doc(sessionToken);
 
   await tokenDocRef.set({
     token,

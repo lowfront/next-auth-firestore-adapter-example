@@ -2,6 +2,28 @@
 
 Example of a firebase adapter that works with firebase authentication. A firebase is a database that has rules functionality for use by both servers and clients. If use firebase on a client, if rule is not set, all data accessible to the client is accessible to anyone who can read the code. When storing user, account, and session data in the next-adapter in the firebase, if rule is not set, all data will be public. This example uses the method of sign in using customToken to protect the data in the firebase at the frontend. After sign in through next-auth's provider, allow api endpoint that issues customToken of the firebase service on the server. When working with the firebase database at the frontend, if the client is not currently sign in as customToken, the user receives a token from the customToken api endpoint and then sign in and proceeds with the database operation. This example was created as a fireestore target, but can also use the same method for the firebase realtime database if necessary.
 
+### Database Structure
+```
+firestore root
+├── _next_auth_firestore_adapter_ [collection]
+│  └── store [document]
+│     ├── account [collection] # account scheme from next-auth
+│     ├── session [collection] # session scheme from next-auth
+│     ├── user [collection] # user scheme from next-auth
+│     └── customToken [collection]
+│        └── <user email> [document]
+│           └── session [collection]
+│              └── <session token> [document] # same as session token in next-auth and when issuing custom token, it is included in additional claims.
+│                 ├── exires [field]
+│                 └── token [field]
+└── store [collection]
+   └── <user email> [document]
+      └── store [collection]
+         └── <user data uid> [document]
+            ├── checked [field]
+            └── label [field]
+```
+
 1. Go to [firebase console](https://console.firebase.google.com/project) and select your project. 
 
 2. In `Project settings > Service accounts > Firebase Admin SDK`, for server, click "Generate new private key" and download "Generate Key" and write it in the `FIREBASE_ADMIN_CONFIG_` key of `.env.local`.
