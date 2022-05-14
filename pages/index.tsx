@@ -16,7 +16,7 @@ import Loading from 'components/Loading';
 
 const Home: NextPage<{data: Session & {id: string}; todos: any[]}> = ({data: session, todos}) => {
   const router = useRouter();
-  const [loading, setLoading] = useState(!!session);
+  // const [loading, setLoading] = useState(!!session);
   const [todoEntrys, setTodoEntrys] = useState<[string, Todo][]>(todos);
   const [editingTodoId, setEditingTodoId] = useState('');
 
@@ -44,7 +44,7 @@ const Home: NextPage<{data: Session & {id: string}; todos: any[]}> = ({data: ses
     (async () => {
       const userCollectionRef = getUserCollection(email, 'store');
       await signInFirebase(); // loading;
-      setLoading(false);
+      // setLoading(false);
 
       // https://github.com/firebase/firebase-js-sdk/issues/5629#issuecomment-945010156
       const unsub = onSnapshot(userCollectionRef, { includeMetadataChanges: true }, (snap) => {
@@ -136,7 +136,7 @@ const Home: NextPage<{data: Session & {id: string}; todos: any[]}> = ({data: ses
 
   return (
     <>
-      <Loading block={loading} />
+      {/* <Loading block={loading} /> */}
       <User session={session} />
       <section className="todoapp">
         <h1>todos</h1>
