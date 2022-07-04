@@ -44,7 +44,7 @@ service cloud.firestore {
 }
 ```
 
-5. Add adapter to `pages/api/auth/[...nextauth].ts`.
+5. Add adapter to `pages/api/auth/[..nextauth].ts`.
 ```ts
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
